@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTA-EXE Converter v1.0 mini — Documentation</title>
+<style>
+  :root {
+    --bg:        #0d1117;
+    --panel:     #111827;
+    --panel2:    #0a1020;
+    --border:    #1a3a6a;
+    --accent:    #e94560;
+    --cyan:      #00b4d8;
+    --cyan-dim:  #007090;
+    --green:     #39d353;
+    --yellow:    #ffd166;
+    --red:       #ff6b6b;
+    --text:      #e8eeff;
+    --text-med:  #8899bb;
+    --text-dim:  #4a5a7a;
+    --mono:      'Consolas', 'Courier New', monospace;
+    --ui:        'Segoe UI', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--ui);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(180deg, #040a20 0%, #0f2244 45%, #080f20 100%);
+    border-bottom: 2px solid var(--accent);
+    position: relative;
+    overflow: hidden;
+    padding: 48px 40px 36px;
+    text-align: center;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 40% at 50% 20%, rgba(0,180,216,.13) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 80%, rgba(233,69,96,.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--cyan), var(--accent));
+  }
+  .hdr-badge {
+    display: inline-block;
+    background: rgba(0,180,216,.12);
+    border: 1px solid var(--cyan-dim);
+    color: var(--cyan);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 3px 14px;
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+  header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  header h1 span.mini {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-med);
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+  header .subtitle {
+    font-size: 13px;
+    color: var(--text-med);
+    margin-bottom: 24px;
+    letter-spacing: .04em;
+  }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    color: var(--text-med);
+  }
+  .badge .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .badge.red    .dot { background: var(--accent); }
+  .badge.cyan   .dot { background: var(--cyan); }
+  .badge.green  .dot { background: var(--green); }
+  .badge.yellow .dot { background: var(--yellow); }
+  .hdr-meta { font-size: 12px; color: var(--text-dim); }
+  .hdr-meta a { color: var(--cyan); text-decoration: none; }
+  .hdr-meta a:hover { text-decoration: underline; }
+
+  /* ── LAYOUT ── */
+  .wrapper { display: flex; max-width: 1200px; margin: 0 auto; }
+
+  /* ── SIDEBAR / TOC ── */
+  nav {
+    width: 240px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 0 28px 20px;
+    border-right: 1px solid var(--border);
+    background: var(--panel2);
+  }
+  nav::-webkit-scrollbar { width: 4px; }
+  nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .toc-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    padding-left: 4px;
+  }
+  nav ul { list-style: none; }
+  nav ul li { margin-bottom: 2px; }
+  nav ul li a {
+    display: block;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--text-med);
+    text-decoration: none;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+    transition: all .15s;
+  }
+  nav ul li a:hover {
+    color: var(--cyan);
+    background: rgba(0,180,216,.07);
+    border-left-color: var(--cyan);
+  }
+  nav ul li.sub a { padding-left: 20px; font-size: 11px; color: var(--text-dim); }
+  nav ul li.sub a:hover { color: var(--text-med); }
+
+  /* ── MAIN CONTENT ── */
+  main {
+    flex: 1;
+    padding: 40px 48px;
+    min-width: 0;
+  }
+
+  /* ── SECTIONS ── */
+  section { margin-bottom: 56px; }
+  section:last-child { margin-bottom: 20px; }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .hico { font-size: 18px; }
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--cyan);
+    margin: 24px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-med);
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  p { margin-bottom: 14px; color: var(--text-med); }
+  p strong { color: var(--text); }
+
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── CODE ── */
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    color: #b8cce4;
+    padding: 16px 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 14px 0;
+    line-height: 1.6;
+  }
+  pre .c  { color: var(--text-dim); }
+  pre .kw { color: var(--cyan); }
+  pre .st { color: var(--green); }
+  pre .cm { color: var(--accent); }
+
+  /* ── DIAGRAM / FLOW ── */
+  .flow {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    color: #b8cce4;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+
+  /* ── TABLES ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 13px;
+  }
+  thead th {
+    background: var(--panel2);
+    color: var(--text-med);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: 8px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid rgba(26,58,106,.5); }
+  tbody tr:hover { background: rgba(0,180,216,.04); }
+  tbody td { padding: 9px 14px; color: var(--text-med); vertical-align: top; }
+  tbody td:first-child { color: var(--text); font-weight: 500; }
+  tbody td code { font-size: 11px; }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 14px 0;
+    font-size: 13px;
+    color: var(--text-med);
+  }
+  .callout .ico { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout.tip   { background: rgba(0,180,216,.08); border: 1px solid rgba(0,180,216,.25); }
+  .callout.warn  { background: rgba(255,209,102,.07); border: 1px solid rgba(255,209,102,.25); }
+  .callout.danger{ background: rgba(233,69,96,.08);   border: 1px solid rgba(233,69,96,.25); }
+  .callout.tip   .ico { color: var(--cyan); }
+  .callout.warn  .ico { color: var(--yellow); }
+  .callout.danger .ico { color: var(--accent); }
+
+  /* ── LOG DEMO ── */
+  .log-demo {
+    background: #060c18;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.9;
+    margin: 14px 0;
+  }
+  .log-info  { color: var(--cyan); }
+  .log-warn  { color: var(--yellow); }
+  .log-err   { color: var(--red); }
+  .log-ok    { color: var(--green); }
+  .log-dim   { color: var(--text-dim); }
+
+  /* ── UI ELEMENT LABELS ── */
+  .ui-label {
+    display: inline-block;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .ui-btn {
+    display: inline-block;
+    background: var(--accent);
+    border-radius: 4px;
+    padding: 2px 12px;
+    font-size: 12px;
+    color: #fff;
+    font-weight: 600;
+  }
+  .ui-btn.sec { background: #0f3460; }
+  .ui-btn.cyan-b { background: var(--cyan-dim); }
+
+  /* ── STEP LIST ── */
+  .steps { list-style: none; counter-reset: steps; margin: 14px 0; }
+  .steps li {
+    counter-increment: steps;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    color: var(--text-med);
+  }
+  .steps li::before {
+    content: counter(steps);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* ── EXTENSION LIST ── */
+  .ext-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .ext-tag {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 4px;
+  }
+
+  /* ── STATUS INDICATOR ── */
+  .status-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: 13px; color: var(--text-med); }
+  .s-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .s-dot.green  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .s-dot.red    { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+  .s-dot.yellow { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 28px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-dim);
+    background: var(--panel2);
+  }
+  footer a { color: var(--cyan); text-decoration: none; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--cyan-dim); }
+
+  @media (max-width: 900px) {
+    nav { display: none; }
+    main { padding: 28px 20px; }
+    header { padding: 32px 20px 24px; }
+    header h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-badge">polsoft.ITS™ dev tools · London 2026</div>
+  <h1>HTA-EXE Converter <span class="mini">v1.0 mini</span></h1>
+  <p class="subtitle">Convert any HTA application into a standalone Windows .exe — no command line required</p>
+  <div class="badges">
+    <span class="badge cyan"><span class="dot"></span>Windows 7 / 10 / 11</span>
+    <span class="badge green"><span class="dot"></span>Python 3.10+</span>
+    <span class="badge yellow"><span class="dot"></span>PyInstaller</span>
+    <span class="badge red"><span class="dot"></span>v1.0 mini</span>
+  </div>
+  <p class="hdr-meta">
+    Author: <strong style="color:#e8eeff">Sebastian Januchowski</strong> &nbsp;·&nbsp;
+    <a href="mailto:polsoft.its@fastservice.com">polsoft.its@fastservice.com</a> &nbsp;·&nbsp;
+    <a href="https://github.com/seb07uk">github.com/seb07uk</a>
+  </p>
+</header>
+
+<div class="wrapper">
+
+<nav>
+  <div class="toc-title">Contents</div>
+  <ul>
+    <li><a href="#what">What is it?</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#requirements">Requirements</a></li>
+    <li><a href="#install">Installation</a></li>
+    <li><a href="#quickstart">Quick Start</a></li>
+    <li><a href="#ui">User Interface</a></li>
+    <li class="sub"><a href="#ui-banner">Banner</a></li>
+    <li class="sub"><a href="#ui-hta">HTA File / Folder</a></li>
+    <li class="sub"><a href="#ui-out">Output Folder</a></li>
+    <li class="sub"><a href="#ui-icon">Icon</a></li>
+    <li class="sub"><a href="#ui-upx">UPX Compression</a></li>
+    <li class="sub"><a href="#ui-convert">Convert Button</a></li>
+    <li class="sub"><a href="#ui-folder">EXE Folder</a></li>
+    <li class="sub"><a href="#ui-meta">Metadata Panel</a></li>
+    <li class="sub"><a href="#ui-log">Log Window</a></li>
+    <li class="sub"><a href="#ui-status">Status Bar</a></li>
+    <li><a href="#metadata">VERSIONINFO</a></li>
+    <li><a href="#upx-deep">UPX Deep Dive</a></li>
+    <li><a href="#bundling">Asset Bundling</a></li>
+    <li><a href="#settings">Settings</a></li>
+    <li><a href="#language">Languages</a></li>
+    <li><a href="#topmost">Always on Top</a></li>
+    <li><a href="#trouble">Troubleshooting</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#technical">Technical Notes</a></li>
+    <li><a href="#license">License</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════ WHAT ══════════════════════════════ -->
+<section id="what">
+  <h2><span class="hico">📄</span> What is HTA-EXE Converter?</h2>
+  <p><strong>HTA-EXE Converter</strong> is a GUI desktop tool for Windows that wraps any <code>.hta</code> (<em>HTML Application</em>) file — or an entire HTA project folder — into a single, self-contained <code>.exe</code> executable.</p>
+  <p>The resulting <code>.exe</code>:</p>
+  <ul style="list-style:none;margin:0 0 14px 0;">
+    <li style="padding:4px 0;color:var(--text-med)"><span style="color:var(--green);margin-right:8px">✔</span> Requires <strong>no Python</strong> installed on the target machine</li>
+    <li style="padding:4px 0;color:var(--text-med)"><span style="color:var(--green);margin-right:8px">✔</span> Requires <strong>no separate files</strong> — all assets are bundled inside</li>
+    <li style="padding:4px 0;color:var(--text-med)"><span style="color:var(--green);margin-right:8px">✔</span> Runs the HTA via Windows built-in <code>mshta.exe</code></li>
+    <li style="padding:4px 0;color:var(--text-med)"><span style="color:var(--green);margin-right:8px">✔</span> Carries full <strong>Windows VERSIONINFO</strong> metadata</li>
+    <li style="padding:4px 0;color:var(--text-med)"><span style="color:var(--green);margin-right:8px">✔</span> Optionally compressed with <strong>UPX</strong></li>
+  </ul>
+  <p>Designed for developers, IT professionals, and power users who build HTA-based tools and want to distribute them as clean, professional <code>.exe</code> files.</p>
+</section>
+
+<!-- ═══════════════════════════════ HOW ═══════════════════════════════ -->
+<section id="how">
+  <h2><span class="hico">⚙</span> How It Works</h2>
+  <div class="flow">┌─────────────────────────────────────────────────────────────┐
+│  Your HTA project                                           │
+│  ├── app.hta        ← entry point                          │
+│  ├── style.css      ← auto-inlined into HTA source         │
+│  ├── logic.js       ← auto-inlined into HTA source         │
+│  └── images/        ← base64-encoded & bundled             │
+└──────────────────────┬──────────────────────────────────────┘
+                       │  Step 1: Collect &amp; inline assets
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Python wrapper script (temp)                               │
+│  • All files embedded as base64 strings                     │
+│  • On launch: extracts to temp dir → calls mshta.exe        │
+│  • Cleans up temp dir on exit (atexit)                      │
+└──────────────────────┬──────────────────────────────────────┘
+                       │  Step 2: PyInstaller --onefile --noconsole
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Final standalone .EXE                                      │
+│  • Single file, zero dependencies                           │
+│  • Optional: Windows VERSIONINFO metadata                   │
+│  • Optional: custom icon (.ico / .png / .jpg / .bmp)        │
+│  • Optional: UPX compression (--best --lzma)                │
+└─────────────────────────────────────────────────────────────┘</div>
+
+  <h3>Step-by-step Internally</h3>
+  <ol class="steps">
+    <li>All project files are <strong>collected</strong> — HTA, CSS, JS, JSON, XML, images, fonts and more</li>
+    <li>External <code>&lt;script src="..."&gt;</code> and <code>&lt;link href="..."&gt;</code> references are <strong>inlined</strong> directly into the HTA source — no broken relative paths at runtime</li>
+    <li>All files are <strong>base64-encoded</strong> and embedded as string literals in a Python wrapper script</li>
+    <li><strong>PyInstaller</strong> <code>--onefile --noconsole</code> compiles the wrapper into a single <code>.exe</code></li>
+    <li>Windows <strong>VERSIONINFO</strong> resource is injected via a <code>version_info.txt</code> spec file</li>
+    <li>Optionally, <strong>UPX</strong> compresses the result for smaller distribution size</li>
+  </ol>
+</section>
+
+<!-- ═══════════════════════════════ REQUIREMENTS ═══════════════════════ -->
+<section id="requirements">
+  <h2><span class="hico">📋</span> Requirements</h2>
+  <table>
+    <thead><tr><th>Requirement</th><th>Details</th><th>Mandatory?</th></tr></thead>
+    <tbody>
+      <tr><td>OS</td><td>Windows 7 / 8 / 10 / 11 (64-bit recommended)</td><td><span style="color:var(--green)">Required</span></td></tr>
+      <tr><td>Python</td><td>3.10 or newer, must be in <code>PATH</code></td><td><span style="color:var(--green)">Required</span></td></tr>
+      <tr><td>PyInstaller</td><td><code>pip install pyinstaller</code></td><td><span style="color:var(--green)">Required</span></td></tr>
+      <tr><td>Pillow</td><td><code>pip install pillow</code> — needed for <code>.png</code> / <code>.jpg</code> / <code>.bmp</code> icons</td><td><span style="color:var(--yellow)">Optional</span></td></tr>
+      <tr><td>UPX</td><td>Place <code>upx.exe</code> next to the app or in <code>PATH</code></td><td><span style="color:var(--yellow)">Optional</span></td></tr>
+      <tr><td>mshta.exe</td><td>Built into Windows — required on the <strong>target machine</strong> to run the generated EXE</td><td><span style="color:var(--green)">On target</span></td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <span class="ico">⚠</span>
+    <span><strong>Python must be installed on the machine running HTA-EXE Converter.</strong> The <em>generated</em> <code>.exe</code> does not require Python on the target machine.</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ INSTALL ════════════════════════════ -->
+<section id="install">
+  <h2><span class="hico">💾</span> Installation</h2>
+  <p>No installation needed. Install dependencies and run:</p>
+  <pre><span class="c"># Install required dependency</span>
+pip install pyinstaller
+
+<span class="c"># Install optional dependency (PNG/JPG icon support)</span>
+pip install pillow
+
+<span class="c"># Run the converter</span>
+python HTA-2-EXE.py</pre>
+  <p>Or double-click <strong>HTA-EXE Converter 1.0 Mini.exe</strong> if you have the pre-built version — no Python needed to run the converter itself in that case.</p>
+</section>
+
+<!-- ═══════════════════════════════ QUICKSTART ═════════════════════════ -->
+<section id="quickstart">
+  <h2><span class="hico">🚀</span> Quick Start</h2>
+  <ol class="steps">
+    <li><strong>Launch</strong> the application</li>
+    <li>Click <span class="ui-btn sec">File…</span> or <span class="ui-btn sec">Folder…</span> and select your <code>.hta</code> file or project folder</li>
+    <li>Optionally pick an <strong>Output Folder</strong> (defaults to the HTA's own directory)</li>
+    <li>Optionally pick an <strong>Icon</strong> file</li>
+    <li>Click <span class="ui-btn">▶ Convert</span></li>
+    <li>When finished, click <span class="ui-btn sec">📁 EXE Folder</span> to open the result</li>
+  </ol>
+  <div class="callout tip">
+    <span class="ico">💡</span>
+    <span>That's all it takes. The log panel shows every step in real time — watch for <span class="log-ok" style="display:inline">✔ Done</span> at the end.</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ UI ════════════════════════════════ -->
+<section id="ui">
+  <h2><span class="hico">🖥</span> User Interface — Full Reference</h2>
+
+  <h3 id="ui-banner">Banner &amp; Title Bar</h3>
+  <p>The animated Aero Glass banner at the top displays the application name <strong>HTA → EXE Converter <em>mini</em></strong> with an animated neon scan line, particle sparks, and a pulsing EXE badge. The subtitle reads <em>polsoft.ITS™ dev tools</em>.</p>
+  <p>The <strong>title bar</strong> shows: <code>HTA-EXE Converter 1.0 Mini by Sebastian Januchowski</code></p>
+
+  <h3 id="ui-hta">📂 HTA File / Folder</h3>
+  <p>The primary input. Point the converter at your HTA source.</p>
+  <table>
+    <thead><tr><th>Button</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ui-btn sec">File…</span></td><td>Opens a file picker filtered to <code>.hta</code>, <code>.html</code>, <code>.htm</code>. Use for single-file apps.</td></tr>
+      <tr><td><span class="ui-btn sec">Folder…</span></td><td>Opens a folder picker. Use for multi-file projects with separate CSS, JS, and image assets.</td></tr>
+    </tbody>
+  </table>
+  <p>When a folder is selected, all files with the following extensions are collected recursively:</p>
+  <div class="ext-list">
+    <span class="ext-tag">.hta</span><span class="ext-tag">.html</span><span class="ext-tag">.htm</span>
+    <span class="ext-tag">.css</span><span class="ext-tag">.js</span><span class="ext-tag">.json</span>
+    <span class="ext-tag">.xml</span><span class="ext-tag">.png</span><span class="ext-tag">.jpg</span>
+    <span class="ext-tag">.jpeg</span><span class="ext-tag">.gif</span><span class="ext-tag">.ico</span>
+    <span class="ext-tag">.svg</span><span class="ext-tag">.bmp</span><span class="ext-tag">.woff</span>
+    <span class="ext-tag">.woff2</span><span class="ext-tag">.ttf</span><span class="ext-tag">.eot</span>
+    <span class="ext-tag">.txt</span><span class="ext-tag">.md</span>
+  </div>
+  <p>The <strong>entry point</strong> is detected automatically: first <code>.hta</code> file wins, then <code>.html</code>, then <code>.htm</code>.</p>
+  <div class="callout tip">
+    <span class="ico">💡</span>
+    <span>Name your main file with a <code>.hta</code> extension to guarantee it is picked up as the entry point.</span>
+  </div>
+
+  <h3 id="ui-out">📁 Output Folder</h3>
+  <p>Where the finished <code>.exe</code> will be saved. Click <span class="ui-btn sec">Browse…</span> to select. If left empty, the output goes to the same folder as the input HTA. The path is remembered between sessions.</p>
+
+  <h3 id="ui-icon">🖼 Icon</h3>
+  <p>Sets the icon embedded into the <code>.exe</code> (visible in Explorer, taskbar, Alt+Tab).</p>
+  <table>
+    <thead><tr><th>Format</th><th>Requirements</th></tr></thead>
+    <tbody>
+      <tr><td><code>.ico</code></td><td>Works directly — no extra dependencies needed</td></tr>
+      <tr><td><code>.png</code></td><td>Requires <strong>Pillow</strong> (<code>pip install pillow</code>)</td></tr>
+      <tr><td><code>.jpg</code> / <code>.jpeg</code></td><td>Requires Pillow</td></tr>
+      <tr><td><code>.bmp</code></td><td>Requires Pillow</td></tr>
+    </tbody>
+  </table>
+  <p>When you pick a non-ICO image, the converter: opens it with Pillow → converts to RGBA → generates a multi-resolution <code>.ico</code> with sizes <strong>16×16 through 256×256</strong> → passes it to PyInstaller.</p>
+  <p>A thumbnail preview of the selected icon appears next to the path field.</p>
+  <div class="callout warn">
+    <span class="ico">⚠</span>
+    <span>Without Pillow, non-ICO icons are silently skipped and a warning appears in the Log. The EXE is still created with the default Python icon.</span>
+  </div>
+
+  <h3 id="ui-upx">📦 UPX Compression</h3>
+  <p>Check <em>compress EXE (--best --lzma)</em> to run UPX on the finished <code>.exe</code>. UPX is auto-detected in this order:</p>
+  <ol style="margin:8px 0 14px 20px;color:var(--text-med)">
+    <li style="margin-bottom:4px"><code>upx.exe</code> in the same folder as HTA-EXE Converter</li>
+    <li><code>upx</code> / <code>upx.exe</code> anywhere in the system <code>PATH</code></li>
+  </ol>
+  <div class="status-row"><span class="s-dot green"></span><span>UPX found — path shown, compression ready</span></div>
+  <div class="status-row"><span class="s-dot red"></span><span>UPX not found — compression skipped even if checkbox is checked</span></div>
+
+  <h3 id="ui-convert">▶ Convert Button</h3>
+  <p>The main action. Starts the full conversion pipeline in a background thread (UI stays responsive).</p>
+  <ol class="steps">
+    <li>Input path validated — must exist</li>
+    <li>If output <code>.exe</code> already exists → <em>"Overwrite?"</em> dialog</li>
+    <li>Log cleared, progress bar starts animating (cyan indeterminate)</li>
+    <li>Background thread runs: collect → inline → base64 → PyInstaller → metadata → UPX</li>
+    <li>On success: success dialog + <span class="ui-btn sec">📁 EXE Folder</span> activates</li>
+    <li>On error: error dialog + red message in Log</li>
+  </ol>
+  <p>While converting the button shows <span class="ui-label">⏳ Converting…</span> and is disabled.</p>
+
+  <h3 id="ui-folder">📁 EXE Folder Button</h3>
+  <p>Opens the output directory in <strong>Windows Explorer</strong>. Disabled until a successful conversion completes. Navigates to the exact parent folder of the generated <code>.exe</code>.</p>
+
+  <h3 id="ui-meta">📋 Metadata Panel</h3>
+  <p>Click <span class="ui-btn sec">📋 Metadata</span> to expand the form. Click again to collapse. The metadata is embedded as a standard Windows PE <strong>VERSIONINFO</strong> resource, visible in <em>File → Properties → Details</em>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Description</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>App name</td><td>Internal / product name of the EXE</td><td><code>MyTool</code></td></tr>
+      <tr><td>Version</td><td>Four-part version number</td><td><code>1.2.0.0</code></td></tr>
+      <tr><td>Company</td><td>Company or author name</td><td><code>polsoft.ITS™ London</code></td></tr>
+      <tr><td>Description</td><td>Short description in file properties</td><td><code>HTA application compiled to EXE</code></td></tr>
+      <tr><td>Copyright</td><td>Copyright string</td><td><code>© 2026 Sebastian Januchowski</code></td></tr>
+    </tbody>
+  </table>
+  <p>All fields optional. If all are blank, VERSIONINFO is omitted entirely. Values are saved between sessions.</p>
+
+  <h3 id="ui-log">◈ Log Window</h3>
+  <p>Real-time output from the conversion pipeline, colour-coded by severity:</p>
+  <div class="log-demo">
+    <div class="log-info">[INFO] Collecting project files…</div>
+    <div class="log-info">[INFO] Found 7 files.</div>
+    <div class="log-info">[INFO] Entry point: app.hta</div>
+    <div class="log-info">[INFO] Inlining local assets…</div>
+    <div class="log-info">[INFO] Inline JS: logic.js</div>
+    <div class="log-info">[INFO] Inline CSS: style.css</div>
+    <div class="log-info">[INFO] Encoded 7 files.</div>
+    <div class="log-info">[INFO] Metadata: MyApp v1.0.0.0</div>
+    <div class="log-info">[INFO] Running PyInstaller…</div>
+    <div class="log-dim">… PyInstaller output …</div>
+    <div class="log-info">[INFO] UPX detected: C:\tools\upx.exe</div>
+    <div class="log-info">[INFO] UPX: 9200 KB → 3450 KB (saved 5750 KB, 37.5%)</div>
+    <div class="log-ok">✔  Done: C:\output\MyApp.exe</div>
+  </div>
+  <p>The log retains the last <strong>200 lines</strong> and auto-scrolls to the newest entry.</p>
+
+  <h3 id="ui-status">📊 Status Bar</h3>
+  <table>
+    <thead><tr><th>Element</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>● dot</code></td><td>Green = ready · Orange = converting · Red = error</td></tr>
+      <tr><td>Status text</td><td><em>Ready</em>, <em>Converting…</em>, <em>Cancelled</em>, or EXE filename</td></tr>
+      <tr><td>Filename</td><td>File being processed or last generated EXE</td></tr>
+      <tr><td><code>⏱ MM:SS</code></td><td>Elapsed conversion time</td></tr>
+      <tr><td><code>ⓘ</code></td><td>Opens the <em>About</em> dialog</td></tr>
+      <tr><td><code>❓</code></td><td>Opens the <em>Help</em> dialog</td></tr>
+      <tr><td><code>EN / PL</code></td><td>Language switch badge</td></tr>
+      <tr><td><code>📍 / 📌</code></td><td>Always on Top toggle</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ VERSIONINFO ════════════════════════ -->
+<section id="metadata">
+  <h2><span class="hico">🏷</span> EXE Metadata — Windows VERSIONINFO</h2>
+  <p>The metadata panel generates a <code>VSVersionInfo</code> block passed to PyInstaller via <code>--version-file</code>. This creates a proper Windows PE resource with both <code>StringFileInfo</code> and <code>VarFileInfo</code> sections.</p>
+  <h4>Fields Embedded</h4>
+  <pre>CompanyName       → Company field
+FileDescription   → Description field
+FileVersion       → Version (string)
+InternalName      → App name
+LegalCopyright    → Copyright field
+OriginalFilename  → App name + .exe
+ProductName       → App name
+ProductVersion    → Version (string)
+filevers / prodvers → Version as tuple (major, minor, patch, build)</pre>
+  <div class="callout tip">
+    <span class="ico">💡</span>
+    <span>Version format must be <code>major.minor.patch.build</code> (e.g. <code>2.1.0.0</code>). Fewer parts are padded with zeros. Invalid format falls back to <code>(1, 0, 0, 0)</code>.</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ UPX DEEP ══════════════════════════ -->
+<section id="upx-deep">
+  <h2><span class="hico">📦</span> UPX Compression — Deep Dive</h2>
+  <p>After PyInstaller finishes, the converter runs:</p>
+  <pre>upx --best --lzma YourApp.exe</pre>
+  <p><code>--best</code> selects maximum compression. <code>--lzma</code> uses the LZMA algorithm for better ratios than the default NRV2B. After compression, the log reports results:</p>
+  <div class="log-demo">
+    <div class="log-info">[INFO] UPX: 8420 KB → 3210 KB (saved 5210 KB, 38.1% of original)</div>
+  </div>
+  <p><strong>Typical compression:</strong> 40–70% size reduction depending on content type.</p>
+  <div class="callout warn">
+    <span class="ico">⚠</span>
+    <span>Some antivirus software flags UPX-compressed executables as suspicious (false positive). This is a well-known UPX limitation unrelated to actual malware. Submit to your AV vendor as a false positive if needed.</span>
+  </div>
+  <p>UPX exit code <code>1</code> is treated as success (file already compressed or compression not beneficial — UPX does not modify the file in this case).</p>
+  <p>Download UPX from <a href="https://upx.github.io" target="_blank">upx.github.io</a> — place <code>upx.exe</code> next to the converter for auto-detection.</p>
+</section>
+
+<!-- ═══════════════════════════════ BUNDLING ═══════════════════════════ -->
+<section id="bundling">
+  <h2><span class="hico">📦</span> Asset Bundling &amp; Inlining</h2>
+
+  <h3>CSS &amp; JavaScript Inlining</h3>
+  <p>Before bundling, external references in the HTA source are detected and inlined:</p>
+  <pre><span class="c">&lt;!-- Before --&gt;</span>
+&lt;script src=<span class="st">"logic.js"</span>&gt;&lt;/script&gt;
+&lt;link rel=<span class="st">"stylesheet"</span> href=<span class="st">"style.css"</span>&gt;
+
+<span class="c">&lt;!-- After inlining --&gt;</span>
+&lt;script&gt;
+  <span class="c">/* full contents of logic.js */</span>
+&lt;/script&gt;
+&lt;style&gt;
+  <span class="c">/* full contents of style.css */</span>
+&lt;/style&gt;</pre>
+  <p>External URLs (<code>http://</code>, <code>https://</code>, <code>//</code>) are left untouched.</p>
+
+  <h3>Binary Assets</h3>
+  <p>Images, fonts, and other binary files are <strong>base64-encoded</strong> and embedded as string literals in the Python wrapper. At runtime they are decoded and written to a temporary directory before <code>mshta.exe</code> is invoked.</p>
+
+  <h3>Temp Directory Lifecycle</h3>
+  <div class="flow">App launches
+    → Creates temp dir  (prefix: hta_app_XXXX)
+    → Extracts all files to temp dir
+    → mshta.exe runs the HTA from temp dir
+    → User closes the HTA window
+    → atexit handler removes temp dir (shutil.rmtree)</div>
+  <p>The cleanup runs via Python's <code>atexit</code> module, so temp files are removed even if the process exits unexpectedly.</p>
+</section>
+
+<!-- ═══════════════════════════════ SETTINGS ══════════════════════════ -->
+<section id="settings">
+  <h2><span class="hico">💾</span> Settings Persistence</h2>
+  <p>Settings are saved automatically to:</p>
+  <pre>%APPDATA%\hta2exe_gui\settings.json</pre>
+  <table>
+    <thead><tr><th>Setting</th><th>What is saved</th></tr></thead>
+    <tbody>
+      <tr><td>Output folder</td><td>Last used output directory path</td></tr>
+      <tr><td>UPX</td><td>Enabled/disabled state and detected path</td></tr>
+      <tr><td>Metadata</td><td>All five metadata fields</td></tr>
+      <tr><td>Window</td><td>Size and position (geometry string)</td></tr>
+      <tr><td>Language</td><td>PL or EN</td></tr>
+      <tr><td>Always on Top</td><td>Pin state (true/false)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ LANGUAGE ══════════════════════════ -->
+<section id="language">
+  <h2><span class="hico">🌐</span> Language Switching</h2>
+  <p>The interface supports <strong>Polish</strong> and <strong>English</strong>. Click the <span class="ui-label">EN</span> or <span class="ui-label">PL</span> badge in the bottom-right of the status bar to switch instantly.</p>
+  <p>The entire UI rebuilds — all labels, buttons, dialogs, and log messages switch language. Form data is preserved during the rebuild. The selected language is saved and restored on next launch.</p>
+</section>
+
+<!-- ═══════════════════════════════ TOPMOST ════════════════════════════ -->
+<section id="topmost">
+  <h2><span class="hico">📌</span> Always on Top</h2>
+  <p>Click the <code>📍</code> pin icon in the status bar to toggle <em>Always on Top</em> mode — the converter window will float above all other windows. Click again (shows <code>📌</code>) to disable. State is saved between sessions.</p>
+</section>
+
+<!-- ═══════════════════════════════ TROUBLESHOOTING ═══════════════════ -->
+<section id="trouble">
+  <h2><span class="hico">🔧</span> Troubleshooting</h2>
+
+  <h3>Layout Horizontal.Neon.TProgressbar not found</h3>
+  <p>A ttk style registration issue in older builds. Fixed in current version — the progress bar style is initialized in <code>App.__init__()</code> using the built-in <code>TProgressbar</code> name. Make sure you are running the latest release.</p>
+
+  <h3>No module named 'PyInstaller'</h3>
+  <pre>pip install pyinstaller</pre>
+
+  <h3>PermissionError / WinError 5</h3>
+  <p>The output <code>.exe</code> is currently running. Close it before rebuilding.</p>
+
+  <h3>mshta.exe not found on target machine</h3>
+  <p>The generated EXE relies on <code>mshta.exe</code> which is part of Windows. Present on all standard installs. May be missing on Windows Server Core or disabled via Group Policy.</p>
+
+  <h3>Icon is ignored / default Python icon</h3>
+  <p>Either Pillow is not installed (for non-ICO formats) or the path is invalid. Check the Log for <span class="log-warn" style="display:inline">[WARN]</span> messages about the icon.</p>
+
+  <h3>UPX not found</h3>
+  <p>Place <code>upx.exe</code> in the same folder as the converter, or add its directory to <code>PATH</code>. The status indicator shows <span style="color:var(--green)">✔</span> when detected.</p>
+
+  <h3>EXE crashes on target machine</h3>
+  <ul style="margin:0 0 14px 20px;color:var(--text-med)">
+    <li style="margin-bottom:6px">Confirm <code>mshta.exe</code> is available on target</li>
+    <li style="margin-bottom:6px">If your HTA uses ActiveX / COM — those must be registered on the target</li>
+    <li>Ensure no absolute paths in your HTA — all referenced files must be in the project folder to get bundled</li>
+  </ul>
+
+  <h3>ValueError: empty range in randrange (banner animation crash)</h3>
+  <p>This was a bug in early builds where particles crashed on very narrow window widths. Fixed in current version with <code>max()</code> guards on the random range.</p>
+</section>
+
+<!-- ═══════════════════════════════ FAQ ═══════════════════════════════ -->
+<section id="faq">
+  <h2><span class="hico">❓</span> FAQ</h2>
+
+  <h3>Does the generated EXE require Python on the target machine?</h3>
+  <p>No. PyInstaller packages the Python runtime. Only <code>mshta.exe</code> (built into Windows) is needed.</p>
+
+  <h3>Can I convert a multi-file HTA project?</h3>
+  <p>Yes. Select the project <strong>folder</strong>. All supported assets are collected and bundled automatically.</p>
+
+  <h3>Will CSS and JavaScript work correctly inside the EXE?</h3>
+  <p>Yes. External references are inlined before bundling, so relative paths work as expected at runtime.</p>
+
+  <h3>Can I use a PNG as the EXE icon?</h3>
+  <p>Yes, with Pillow installed (<code>pip install pillow</code>). It is auto-converted to a multi-resolution <code>.ico</code>.</p>
+
+  <h3>How much does UPX reduce file size?</h3>
+  <p>Typically 40–70%. A 10 MB EXE may compress to 3–5 MB.</p>
+
+  <h3>Can the converter itself run as an EXE (frozen by PyInstaller)?</h3>
+  <p>Yes. When running frozen, it detects this via <code>sys.frozen</code> and searches <code>PATH</code> for a real Python interpreter (<code>python</code>, <code>python3</code>, then <code>py</code>) to run PyInstaller.</p>
+
+  <h3>Where are settings stored?</h3>
+  <p><code>%APPDATA%\hta2exe_gui\settings.json</code></p>
+
+  <h3>My antivirus flags the generated EXE — is it a virus?</h3>
+  <p>No. PyInstaller-generated executables are commonly false-positived by AV software, especially when UPX-compressed. Submit to your AV vendor as a false positive.</p>
+</section>
+
+<!-- ═══════════════════════════════ TECHNICAL ══════════════════════════ -->
+<section id="technical">
+  <h2><span class="hico">🔬</span> Technical Notes</h2>
+  <table>
+    <thead><tr><th>Detail</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Threading</td><td>Conversion runs in a <code>daemon=True</code> background thread — UI stays fully responsive</td></tr>
+      <tr><td>Temp directory</td><td>Created via <code>tempfile.mkdtemp()</code>, always cleaned up via <code>atexit.register(shutil.rmtree, …)</code></td></tr>
+      <tr><td>PyInstaller flags</td><td><code>--onefile</code> <code>--noconsole</code> <code>--distpath</code> <code>--workpath</code> <code>--icon</code> <code>--version-file</code></td></tr>
+      <tr><td>CSS/JS inlining</td><td>Regex on <code>&lt;script src&gt;</code> and <code>&lt;link href&gt;</code>; only local refs inlined, external URLs untouched</td></tr>
+      <tr><td>Base64 overhead</td><td>Binary assets ~33% larger in wrapper; PyInstaller compresses the bundle further</td></tr>
+      <tr><td>Python discovery</td><td>When frozen: searches <code>python</code> → <code>python3</code> → <code>py</code> in PATH</td></tr>
+      <tr><td>UPX exit code 1</td><td>Treated as success — UPX returns 1 when file is already compressed</td></tr>
+      <tr><td>Log retention</td><td>Max 200 lines to prevent memory growth during verbose builds</td></tr>
+      <tr><td>Settings format</td><td>JSON, UTF-8, pretty-printed with 2-space indent</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ LICENSE ════════════════════════════ -->
+<section id="license">
+  <h2><span class="hico">📜</span> License</h2>
+  <div class="flow">© 2026 Sebastian Januchowski. All rights reserved.
+polsoft.ITS™ London
+
+This software is proprietary. Redistribution, modification,
+or commercial use without explicit written permission is prohibited.
+
+Contact: polsoft.its@fastservice.com</div>
+</section>
+
+</main>
+</div>
+
+<footer>
+  <p><strong>HTA-EXE Converter</strong> v1.0 mini &nbsp;·&nbsp; polsoft.ITS™ dev tools &nbsp;·&nbsp; London 2026</p>
+  <p style="margin-top:6px">Built with Python · Tkinter · PyInstaller &nbsp;|&nbsp;
+    <a href="mailto:polsoft.its@fastservice.com">polsoft.its@fastservice.com</a> &nbsp;·&nbsp;
+    <a href="https://github.com/seb07uk">github.com/seb07uk</a>
+  </p>
+</footer>
+
+</body>
+</html>

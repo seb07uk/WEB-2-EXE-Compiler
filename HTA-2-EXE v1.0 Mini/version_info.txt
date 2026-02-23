@@ -1,0 +1,45 @@
+# ============================================================
+#  version_info.txt  —  Windows VERSIONINFO dla HTA-2-EXE
+#  Używany przez PyInstaller: --version-file=version_info.txt
+#  polsoft.ITS™ London  |  2026© Sebastian Januchowski
+# ============================================================
+
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    # filevers / prodvers: krotka (major, minor, patch, build)
+    filevers=(1, 0, 0, 0),
+    prodvers=(1, 0, 0, 0),
+    # Maska atrybutów: 0x3f = wszystkie bity
+    mask=0x3f,
+    # Flagi: 0x0 = release (bez VS_FF_DEBUG, VS_FF_PRERELEASE itp.)
+    flags=0x0,
+    # OS: VOS__WINDOWS32
+    OS=0x40004,
+    # Typ pliku: VFT_APP (aplikacja)
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable(
+        # Język: 0409 = English (US), Strona kodowa: 04B0 = Unicode
+        u'040904B0',
+        [
+          StringStruct(u'CompanyName',      u'polsoft.ITS™ London'),
+          StringStruct(u'FileDescription',  u'HTA to EXE Converter — mshta + PyInstaller'),
+          StringStruct(u'FileVersion',      u'1.0.0.0'),
+          StringStruct(u'InternalName',     u'HTA-2-EXE'),
+          StringStruct(u'LegalCopyright',   u'2026© Sebastian Januchowski. All rights reserved.'),
+          StringStruct(u'LegalTrademarks',  u'polsoft.ITS™'),
+          StringStruct(u'OriginalFilename', u'HTA-2-EXE.exe'),
+          StringStruct(u'ProductName',      u'HTA → EXE Konwerter'),
+          StringStruct(u'ProductVersion',   u'1.0.0.0'),
+          StringStruct(u'Comments',         u'https://github.com/seb07uk'),
+          StringStruct(u'Contact',          u'polsoft.its@fastservice.com'),
+        ]
+      )
+    ]),
+    VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
+  ]
+)
